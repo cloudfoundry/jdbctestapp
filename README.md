@@ -60,7 +60,8 @@ a service, passing a `--no-start` flag to the CF CLI.
 
 The application provides a set of Create (`POST /?name=<new-user-name>`), Get (`GET /<user-id>`), List (`GET /`), and
 Delete (`DELETE /<user-id>`) operations on a
-`User` entity, mounted at the application root.
+`User` entity, mounted at the application root. The `User` is an extremely simple entity that has only two attributes:
+`id` and `name`.
 
 ## SSL information endpoints
 

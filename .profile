@@ -1,6 +1,13 @@
+# This script will be run automatically by the Cloud Foundry Java Buildpack before the app is launched
+
 if [[ $(echo "$VCAP_SERVICES" | jq '0 + (.["csb-aws-postgresql"] | length) + (.["csb-aws-aurora-postgresql"] | length)') -gt 0 ]]; then
   cat /app/BOOT-INF/classes/banners/aws-postgres.txt
   cat /app/BOOT-INF/classes/banners/aws-postgres-end.txt
+fi
+
+if [[ $(echo "$VCAP_SERVICES" | jq '0 + (.["csb-aws-mysql"] | length) + (.["csb-aws-aurora-mysql"] | length)') -gt 0 ]]; then
+  cat /app/BOOT-INF/classes/banners/aws-mysql.txt
+  cat /app/BOOT-INF/classes/banners/aws-mysql-end.txt
 fi
 
 if [[ $(echo "$VCAP_SERVICES" | jq '.["csb-google-mysql"] | length') -gt 0 ]]; then

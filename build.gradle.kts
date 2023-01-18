@@ -90,6 +90,7 @@ tasks.named<BootJar>("bootJar") {
     from(".profile") {
         into("")
     }
+    exclude("**/application-*.yml")
     archiveBaseName.set(jarBasename)
 }
 
