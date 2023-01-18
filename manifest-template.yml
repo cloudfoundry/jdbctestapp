@@ -1,0 +1,10 @@
+---
+applications:
+- name: ${basename}
+  path: libs/${basename}-${version}.jar
+  env:
+    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 17.+ } }'
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{ enabled: false }'
+    FLYWAY_POSTGRESQL_TRANSACTIONAL_LOCK: false
+    JAVA_OPTS: '${extraJavaOptions}'
+    ${keystorePassword}
