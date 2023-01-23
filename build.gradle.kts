@@ -1,41 +1,23 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
-import java.nio.file.Paths
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
-val iaasPropertyName = "iaas"
-val keystorePasswordPropertyName = "keystorePassword"
-val defaultKeystorePassword = "fakepassword"
 val initialMigrationFilename = "V1__Create_users.sql"
 
-fun isDatabaseEngine(engine: String): Boolean {
-    return Files.mismatch(
+fun isDatabaseEngine(engine: String): Boolean =
+    doesFileContentMatch(
         Paths.get("src", "main", "resources", "db", engine, initialMigrationFilename),
         Paths.get("src", "main", "resources", "db", "migration", initialMigrationFilename)
-    ) < 0
-}
+    )
 
+fun doesFileContentMatch(path1: Path, path2: Path): Boolean =
+    Files.mismatch(path1, path2) < 0
 
 val isPostgres: Boolean = isDatabaseEngine("postgres")
 val isMysql: Boolean = isDatabaseEngine("mysql")
 val jarBasename: String = "${project.name}-${if (isMysql) "mysql" else "postgres"}"
-
-// Manifest generation options
-val isGCP: Boolean = isIaasPlatform("GCP")
-val keystorePasswordValue: String = (getProjectProperty(keystorePasswordPropertyName) ?: defaultKeystorePassword)
-val keystorePassword: String = if (isGCP) "JAVA_KEYSTORE_PASSWORD: '${keystorePasswordValue}'" else ""
-val extraJavaOptions: String =
-    if (isGCP) "-Djavax.net.ssl.keyStore=/app/META-INF/keystore.jks -Djavax.net.ssl.keyStorePassword=$keystorePasswordValue" else ""
-
-fun isIaasPlatform(name: String): Boolean {
-    val iaas = getProjectProperty(iaasPropertyName)
-    return iaas != null && iaas.equals(name, true)
-}
-
-fun getProjectProperty(name: String): String? {
-    return if (project.hasProperty(name)) project.properties[name] as? String else null
-}
-
 
 
 plugins {
@@ -87,9 +69,6 @@ tasks.withType<Test> {
 }
 
 tasks.named<BootJar>("bootJar") {
-    from(".profile") {
-        into("")
-    }
     exclude("**/application-*.yml")
     archiveBaseName.set(jarBasename)
 }
@@ -125,8 +104,6 @@ tasks.register<Copy>("deploymentManifest") {
     expand(
         Pair("version", version),
         Pair("basename", jarBasename),
-        Pair("extraJavaOptions", extraJavaOptions),
-        Pair("keystorePassword", keystorePassword),
     )
 }
 
