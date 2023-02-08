@@ -2,7 +2,7 @@
 
 This application can be used to test database connections set up with a JDBC URL,
 and report SSL/TLS information. Currently, the application only supports the following
-databases:
+database engines:
 
 - PostgreSQL
 - MySQL
@@ -85,14 +85,14 @@ Delete (`DELETE /<user-id>`) operations on a
 
 ```json
 {
-  "pid": 4660,
+  "pid": 8546,
   "ssl": true,
   "version": "TLSv1.2",
   "cipher": "ECDHE-RSA-AES256-GCM-SHA384",
   "bits": 256,
-  "clientDN": null,
-  "clientSerial": null,
-  "issuerDN": null
+  "clientDN": "/CN=DaH08q7h0487hF8u/O=Google\\, Inc/C=US",
+  "clientSerial": "948546794",
+  "issuerDN": "/dnQualifier=58a5c5f4-55b0-4d22-aba7-87880d1ad0ab/CN=Google Clo"
 }
 ```
 
