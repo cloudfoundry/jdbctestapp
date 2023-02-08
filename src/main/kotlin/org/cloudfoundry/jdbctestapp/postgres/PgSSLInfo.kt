@@ -17,7 +17,7 @@ data class PgSSLInfo(
     @Column(name = "client_dn")
     val clientDN: String? = null,
     @Column(name = "client_serial")
-    val clientSerial: Number? = null,
+    val clientSerial: String? = null,
     @Column(name = "issuer_dn")
     val issuerDN: String? = null
     )
