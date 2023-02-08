@@ -4,20 +4,44 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
+val iaasPropertyName = "iaas"
+val disableBindingTLSDetectionPropertyName = "disableBindingTLSDetection"
+val keystorePasswordPropertyName = "keystorePassword"
+val defaultKeystorePassword = "fakepassword"
 val initialMigrationFilename = "V1__Create_users.sql"
 
-fun isDatabaseEngine(engine: String): Boolean =
-    doesFileContentMatch(
-        Paths.get("src", "main", "resources", "db", engine, initialMigrationFilename),
-        Paths.get("src", "main", "resources", "db", "migration", initialMigrationFilename)
-    )
+fun isDatabaseEngine(engine: String): Boolean = doesFileContentMatch(
+    Paths.get("src", "main", "resources", "db", engine, initialMigrationFilename),
+    Paths.get("src", "main", "resources", "db", "migration", initialMigrationFilename)
+)
 
-fun doesFileContentMatch(path1: Path, path2: Path): Boolean =
-    Files.mismatch(path1, path2) < 0
+fun doesFileContentMatch(path1: Path, path2: Path): Boolean = Files.mismatch(path1, path2) < 0
 
 val isPostgres: Boolean = isDatabaseEngine("postgres")
 val isMysql: Boolean = isDatabaseEngine("mysql")
-val jarBasename: String = "${project.name}-${if (isMysql) "mysql" else "postgres"}"
+val disableBindingTLSDetection: Boolean =
+    getProjectProperty(disableBindingTLSDetectionPropertyName)?.equals("true", true) ?: false
+val bindingDetectionJarNameSuffix: String = if (disableBindingTLSDetection) "-no-autotls" else ""
+val jarDatabaseName: String = if (isMysql) "mysql" else "postgres"
+val jarBasename: String = "${project.name}-${jarDatabaseName}${bindingDetectionJarNameSuffix}"
+
+// Manifest generation options
+val isGCP: Boolean = isIaasPlatform("GCP")
+val shouldGenerateGCPManifest: Boolean = isGCP and !disableBindingTLSDetection
+val keystorePasswordValue: String = getProjectProperty(keystorePasswordPropertyName) ?: defaultKeystorePassword
+val keystorePassword: String = if (shouldGenerateGCPManifest) keystorePasswordValue else ""
+val extraJavaOptions: String =
+    if (shouldGenerateGCPManifest) "-Djavax.net.ssl.keyStore=/app/META-INF/keystore.jks -Djavax.net.ssl.keyStorePassword=$keystorePasswordValue" else ""
+
+fun isIaasPlatform(name: String): Boolean {
+    val iaas = getProjectProperty(iaasPropertyName)
+    return iaas != null && iaas.equals(name, true)
+}
+
+fun getProjectProperty(name: String): String? {
+    return if (project.hasProperty(name)) project.properties[name] as? String else null
+}
+
 
 
 plugins {
@@ -29,7 +53,7 @@ plugins {
 }
 
 group = "org.cloudfoundry"
-version = "1.0.0"
+version = "1.1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 java.targetCompatibility = JavaVersion.VERSION_17
 
@@ -69,6 +93,11 @@ tasks.withType<Test> {
 }
 
 tasks.named<BootJar>("bootJar") {
+    if (!disableBindingTLSDetection) {
+        from("cf/.profile") {
+            into("")
+        }
+    }
     exclude("**/application-*.yml")
     archiveBaseName.set(jarBasename)
 }
@@ -97,13 +126,15 @@ tasks.register<Copy>("deploymentManifest") {
         tasks.named("inspectClassesForKotlinIC")
     )
 
-    from("manifest-template.yml")
+    from("cf/manifest-template.yml")
     into("build")
     rename("manifest-template.yml", "manifest.yml")
 
     expand(
         Pair("version", version),
         Pair("basename", jarBasename),
+        Pair("extraJavaOptions", extraJavaOptions),
+        Pair("keystorePassword", keystorePassword),
     )
 }
 
@@ -121,8 +152,8 @@ tasks.register<Exec>("deploy") {
 }
 
 tasks.register<Exec>("initialDeploy") {
-    description = "Deploy the application without starting"
     group = "Cloud Foundry"
+    description = "Deploy the application without starting"
 
     dependsOn(tasks.named("bootJar"))
     mustRunAfter(tasks.named("bootJar"))

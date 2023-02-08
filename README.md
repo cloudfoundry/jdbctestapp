@@ -22,17 +22,50 @@ on the required database.
 After that, running `gradlew bootJar` will produce a JAR pre-configured for the indicated database engine
 in `build/libs`.
 
+### Automatic TLS Certificate extraction
+
+By default, the generated JAR will contain a shell script that will automatically
+run on CloudFoundry and attempt to extract TLS certificates from the service binding.
+Currently supported services are:
+
+- CloudSQL for MySQL on GCP via [Cloud Services Broker](https://github.com/cloudfoundry/cloud-service-broker).
+
+In order to disable the script, build the JAR with a project flag `disableBindingTLSDetection` set to `false`, e.g.:
+```
+gradlew bootJar -P disableBindingTLSDetection=true
+```
+
 ## Generating a sample manifest
 
 Once the database engine is configured, a sample Cloud Foundry application manifest can be generated.
 Running `gradlew deploymentManifest` task will generate a sample manifest in the root of the `build` directory.
 
+### GCP CloudSQL
+
+On GCP, each CloudSQL instance gets its own CA and certificate generated, so the manifest will have to include 
+additional environment variables in order to support this:
+
+- `-P iaas=gcp` (Required for GCP) This flag is need in this exact form to set up the manifest to use instance-specific
+  certificates, keys and CAs.
+- `-P keystorePassword=super-secret-password` It's recommended to override the default password used in the keystore
+  generated for the GCP deployment.
+
+Run the `deploymentManifest` gradle task to generate a sample manifest in the root of the `build` directory:
+
+```shell
+# For CloudSQL-specific certificate handling on GCP
+$ ./gradlew deploymentManifest -P iaas=gcp -P keystorePassword=super-secure-password
+
+# For AWS no options are needed
+$ ./gradlew deploymentManifest 
+```
 
 ## Deploying from this repository
 
 It's also possible to use gradle in order to deploy this application to Cloud Foundry. As the deployment task depends
 on the `bootJar` and the `deploymentManifest` tasks, it requires the same configuration, namely, running the database
-engine configuration tasks. The deployment tasks rely on the CF CLI, and expect it to be logged in.
+engine configuration tasks, and requiring the `-P iaas=gcp` flag when deploying to GCP. The deployment tasks rely on
+the CF CLI, and expect it to be logged in.
 
 There are two gradle tasks: `initialDeploy` and `deploy`. The first is intended to deploy the app before binding it to
 a service, passing a `--no-start` flag to the CF CLI.
