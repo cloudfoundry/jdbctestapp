@@ -5,6 +5,11 @@ if [[ $(echo "$VCAP_SERVICES" | jq '0 + (.["csb-aws-postgresql"] | length) + (.[
   cat /app/BOOT-INF/classes/banners/aws-postgres-end.txt
 fi
 
+if [[ $(echo "$VCAP_SERVICES" | jq '0 + (.["csb-aws-mssql"] | length)') -gt 0 ]]; then
+  cat /app/BOOT-INF/classes/banners/aws-mssql.txt
+  cat /app/BOOT-INF/classes/banners/aws-mssql-end.txt
+fi
+
 if [[ $(echo "$VCAP_SERVICES" | jq '0 + (.["csb-aws-mysql"] | length) + (.["csb-aws-aurora-mysql"] | length)') -gt 0 ]]; then
   cat /app/BOOT-INF/classes/banners/aws-mysql.txt
   cat /app/BOOT-INF/classes/banners/aws-mysql-end.txt
