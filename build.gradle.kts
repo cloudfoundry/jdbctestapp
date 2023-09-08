@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.ir.backend.js.compile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import java.nio.file.Files
 import java.nio.file.Path
@@ -19,10 +20,11 @@ fun doesFileContentMatch(path1: Path, path2: Path): Boolean = Files.mismatch(pat
 
 val isPostgres: Boolean = isDatabaseEngine("postgres")
 val isMysql: Boolean = isDatabaseEngine("mysql")
+val isSQLServer: Boolean = isDatabaseEngine("sqlserver")
 val disableBindingTLSDetection: Boolean =
     getProjectProperty(disableBindingTLSDetectionPropertyName)?.equals("true", true) ?: false
 val bindingDetectionJarNameSuffix: String = if (disableBindingTLSDetection) "-no-autotls" else ""
-val jarDatabaseName: String = if (isMysql) "mysql" else "postgres"
+val jarDatabaseName: String = if (isMysql) "mysql" else if (isPostgres) "postgres" else "sqlserver"
 val jarBasename: String = "${project.name}-${jarDatabaseName}${bindingDetectionJarNameSuffix}"
 
 // Manifest generation options
@@ -76,6 +78,10 @@ dependencies {
     if (isPostgres) {
         runtimeOnly("org.postgresql:postgresql:42.5.1")
     }
+    if (isSQLServer) {
+        implementation("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre17")
+        implementation("org.flywaydb:flyway-sqlserver")
+    }
 
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -113,6 +119,13 @@ tasks.register<Copy>("configureForMysql") {
     group = "build"
     description = "Configure artefacts specific to MySQL"
     from("src/main/resources/db/mysql")
+    into("src/main/resources/db/migration")
+}
+
+tasks.register<Copy>("configureForSQLServer") {
+    group = "build"
+    description = "Configure artefacts specific to SQL Server"
+    from("src/main/resources/db/sqlserver")
     into("src/main/resources/db/migration")
 }
 

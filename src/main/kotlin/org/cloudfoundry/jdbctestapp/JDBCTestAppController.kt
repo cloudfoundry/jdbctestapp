@@ -4,6 +4,8 @@ import org.cloudfoundry.jdbctestapp.mysql.MysqlOption
 import org.cloudfoundry.jdbctestapp.mysql.MysqlOptionRepository
 import org.cloudfoundry.jdbctestapp.postgres.PgSSLInfo
 import org.cloudfoundry.jdbctestapp.postgres.PgSSLInfoRepository
+import org.cloudfoundry.jdbctestapp.sqlserver.SQLServerOption
+import org.cloudfoundry.jdbctestapp.sqlserver.SQLServerOptionRepository
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,7 +20,8 @@ import java.util.Optional
 class JDBCTestAppController(
     val userRepository: UserRepository,
     val mysqlOptionRepository: MysqlOptionRepository,
-    val pgSSLInfoRepository: PgSSLInfoRepository
+    val pgSSLInfoRepository: PgSSLInfoRepository,
+    val sqlServerSSLInfoRepository: SQLServerOptionRepository
 ) {
 
     @GetMapping(path = ["/"])
@@ -58,5 +61,9 @@ class JDBCTestAppController(
     @GetMapping(path = ["/postgres-ssl"])
     fun pgSSL(): PgSSLInfo {
         return pgSSLInfoRepository.sslInfo()
+    }
+    @GetMapping(path = ["/sqlserver-ssl"])
+    fun sqlServerSSL(): SQLServerOption {
+        return sqlServerSSLInfoRepository.sslInfo()
     }
 }

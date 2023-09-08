@@ -6,6 +6,7 @@ database engines:
 
 - PostgreSQL
 - MySQL
+- SQLServer
 
 It has been verified to run on the following IaaS platforms:
 
@@ -16,8 +17,8 @@ It has been verified to run on the following IaaS platforms:
 
 This application is supposed to be deployed to [Cloud Foundry](https://cloudfoundry.org), which requires a fat JAR for
 deployment. However, before the JAR is generated, the project needs some DB-specific adjustments. These can be made by
-running one of the configuration gradle tasks provided: either `configureForMysql`, or `configureForPostgres` depending
-on the required database.
+running one of the configuration gradle tasks provided: either `configureForMysql`, `configureForPostgres`, or `configureForSQLServer`
+depending on the required database.
 
 After that, running `gradlew bootJar` will produce a JAR pre-configured for the indicated database engine
 in `build/libs`.
