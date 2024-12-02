@@ -79,7 +79,7 @@ dependencies {
         runtimeOnly("org.postgresql:postgresql:42.5.1")
     }
     if (isSQLServer) {
-        implementation("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre17")
+        implementation("com.microsoft.sqlserver:mssql-jdbc:12.3.0.jre17-preview")
         implementation("org.flywaydb:flyway-sqlserver")
     }
 
