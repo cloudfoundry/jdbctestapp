@@ -70,7 +70,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.flywaydb:flyway-core")
-    runtimeOnly("io.pivotal.cfenv:java-cfenv-boot:2.4.1")
+    runtimeOnly("io.pivotal.cfenv:java-cfenv-boot:2.5.0")
 
     if (isMysql) {
         implementation("org.flywaydb:flyway-mysql")
