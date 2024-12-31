@@ -12,6 +12,13 @@ updates:
   allow:
     - dependency-type: "all"
   ignore:
+    # Pin Spring Boot version to 3.0.1
+    - dependency-name: "org.springframework.boot"
+      versions: [">3.0.1"]
+    # Pin Spring Dependency Management version to 1.1.6
+    - dependency-name: "io.spring.dependency-management"
+      versions: [">1.1.6"]
+    # Keep existing rule to ignore major version updates
     - dependency-name: "*"
       update-types: ["version-update:semver-major"]
 
