@@ -75,7 +75,7 @@ dependencies {
         implementation("org.flywaydb:flyway-mysql")
     }
     if (isPostgres) {
-        runtimeOnly("org.postgresql:postgresql:42.7.6")
+        runtimeOnly("org.postgresql:postgresql:42.7.7")
     }
     if (isSQLServer) {
         implementation("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre17")
